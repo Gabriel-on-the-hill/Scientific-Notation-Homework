@@ -320,7 +320,11 @@
       <div class="results-msg" id="results-msg"></div>
     </div>
     <ul class="results-list" id="results-list"></ul>
-    <button class="btn btn-blue btn-full" onclick="restartQuiz()" style="margin-top:28px">
+    <button class="btn btn-green btn-full" onclick="copyScore()" style="margin-top:28px">
+      Copy score to clipboard
+    </button>
+    <p id="copy-confirm" style="text-align:center;color:#58cc02;font-size:13px;margin-top:10px;display:none">✓ Copied! You can now paste it into a message.</p>
+    <button class="btn btn-blue btn-full" onclick="restartQuiz()" style="margin-top:12px">
       ↩ Review example &amp; try again
     </button>
   </div>
@@ -572,6 +576,26 @@ function showResults() {
       r.q +
     '</li>'
   ).join('');
+}
+
+function copyScore() {
+  const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  const pct  = Math.round((score / questions.length) * 100);
+  const missed = results
+    .map((r, i) => r.correct ? null : '  Q' + (i + 1) + ': ' + questions[i].q)
+    .filter(Boolean)
+    .join('\n');
+  const text =
+    'Student: Divine\n' +
+    'Homework: Scientific Notation\n' +
+    'Date: ' + date + '\n' +
+    'Score: ' + score + ' / ' + questions.length + ' (' + pct + '%)\n' +
+    (missed ? '\nQuestions to review:\n' + missed : '\nAll questions correct!');
+  navigator.clipboard.writeText(text).then(function() {
+    const el = document.getElementById('copy-confirm');
+    el.style.display = 'block';
+    setTimeout(function() { el.style.display = 'none'; }, 3000);
+  });
 }
 
 function restartQuiz() {
