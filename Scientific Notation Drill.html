@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scientific Notation Drill — Divine</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 28px 16px 48px;
+    }
+
+    .top-bar {
+      max-width: 680px;
+      width: 100%;
+      margin-bottom: 18px;
+    }
+    .top-bar-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .progress-label { font-size: 13px; color: #888; font-weight: 600; letter-spacing: .3px; }
+    .score-label    { font-size: 13px; color: #58cc02; font-weight: 700; }
+    .progress-bar {
+      height: 10px;
+      background: #dde3ea;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1cb0f6, #0e8fd4);
+      border-radius: 99px;
+      transition: width 0.45s cubic-bezier(.4,0,.2,1);
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 36px 40px;
+      max-width: 680px;
+      width: 100%;
+      box-shadow: 0 4px 24px rgba(0,0,0,.07);
+    }
+
+    h1 { font-size: 22px; color: #1a1a2e; margin-bottom: 6px; }
+    h2 { font-size: 17px; color: #1a1a2e; margin-bottom: 14px; font-weight: 700; }
+    .subtitle { font-size: 13px; color: #aaa; margin-bottom: 22px; font-weight: 500; }
+    p  { color: #444; line-height: 1.65; margin-bottom: 12px; font-size: 15px; }
+
+    .rule-box {
+      background: #fff8ec;
+      border-left: 4px solid #ff9600;
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      margin: 14px 0;
+    }
+    .rule-box .rule-text { font-size: 15px; color: #333; line-height: 1.7; }
+    .rule-box .rule-text strong { color: #1a1a2e; }
+
+    .example-box {
+      background: #f4fbff;
+      border-left: 4px solid #1cb0f6;
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      margin: 14px 0;
+    }
+    .step-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      padding: 5px 0;
+      font-size: 15px;
+      color: #333;
+      border-bottom: 1px solid #e8f4fb;
+    }
+    .step-row:last-child { border-bottom: none; }
+    .step-arrow { color: #1cb0f6; font-weight: 700; flex-shrink: 0; }
+    .math {
+      font-family: 'Courier New', Courier, monospace;
+      background: #eef7ff;
+      color: #0a5fa8;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 15px;
+    }
+    .math-inline {
+      font-family: 'Courier New', Courier, monospace;
+      background: #f3f3f3;
+      color: #1a1a2e;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 14px;
+    }
+    .tag-red  { color: #e03e2d; font-weight: 700; }
+    .tag-grn  { color: #58cc02; font-weight: 700; }
+    .tag-org  { color: #ff9600; font-weight: 700; }
+    .divider  { border: none; border-top: 1px solid #eef0f3; margin: 22px 0; }
+
+    .question-text {
+      font-size: 19px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 22px;
+      line-height: 1.45;
+    }
+    .choices { display: flex; flex-direction: column; gap: 10px; }
+    .choice-btn {
+      padding: 15px 20px;
+      border: 2px solid #dde3ea;
+      border-radius: 10px;
+      background: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color .15s, background .15s, box-shadow .15s;
+      color: #1a1a2e;
+      font-family: inherit;
+      font-weight: 500;
+    }
+    .choice-btn:hover:not(:disabled) {
+      border-color: #1cb0f6;
+      background: #f4fbff;
+      box-shadow: 0 0 0 3px #d0eefa;
+    }
+    .choice-btn.correct  { border-color: #58cc02; background: #f2ffe8; color: #2d6a00; font-weight: 700; }
+    .choice-btn.wrong    { border-color: #e03e2d; background: #fff3f3; color: #9b1c1c; }
+    .choice-btn:disabled { cursor: default; }
+
+    .feedback {
+      margin-top: 22px;
+      padding: 18px 22px;
+      border-radius: 10px;
+      display: none;
+      animation: fadeIn .25s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .feedback.correct-fb { background: #f2ffe8; border: 1.5px solid #58cc02; }
+    .feedback.wrong-fb   { background: #fff9f0; border: 1.5px solid #ff9600; }
+    .fb-title { font-size: 15px; font-weight: 800; margin-bottom: 10px; }
+    .correct-fb .fb-title { color: #58cc02; }
+    .wrong-fb   .fb-title { color: #ff9600; }
+    .sol-step {
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(0,0,0,.06);
+      font-size: 14px;
+      color: #444;
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+    }
+    .sol-step:last-child { border-bottom: none; }
+    .sol-num {
+      background: #ff9600;
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      border-radius: 99px;
+      min-width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .sol-text { font-family: 'Courier New', monospace; color: #222; line-height: 1.5; }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 32px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 22px;
+      transition: opacity .15s, transform .1s, box-shadow .15s;
+      font-family: inherit;
+      letter-spacing: .2px;
+    }
+    .btn:hover { opacity: .92; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+    .btn-blue  { background: #1cb0f6; color: #fff; }
+    .btn-green { background: #58cc02; color: #fff; }
+    .btn-full  { width: 100%; text-align: center; }
+    .hidden    { display: none !important; }
+
+    .results-header { text-align: center; padding: 8px 0 24px; }
+    .results-emoji  { font-size: 52px; margin-bottom: 10px; }
+    .results-score  { font-size: 52px; font-weight: 900; color: #1cb0f6; line-height: 1; }
+    .results-denom  { font-size: 20px; color: #999; font-weight: 600; margin-top: 4px; }
+    .results-msg    { font-size: 15px; color: #555; margin-top: 10px; line-height: 1.6; }
+    .results-list   { list-style: none; margin-top: 20px; }
+    .results-list li {
+      padding: 10px 6px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: #444;
+    }
+    .dot       { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green { background: #58cc02; }
+    .dot-red   { background: #e03e2d; }
+    .q-num     { font-weight: 700; color: #1a1a2e; white-space: nowrap; }
+
+    .screen        { display: none; }
+    .screen.active { display: block; }
+  </style>
+</head>
+<body>
+
+<div class="top-bar" id="topBar" style="display:none">
+  <div class="top-bar-row">
+    <span class="progress-label" id="progressLabel">Question 1 of 6</span>
+    <span class="score-label"    id="scoreLabel">✓ 0</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="card">
+
+  <!-- ══════════════════════════════════════
+       SCREEN 0 — Rule + examples
+  ══════════════════════════════════════ -->
+  <div class="screen active" id="screen-example">
+    <h1>Fixing scientific notation</h1>
+    <p class="subtitle">One rule. Two directions. Master this and Q7 and Q10 become easy.</p>
+
+    <p>After a multiplication or division, the answer sometimes lands outside proper scientific notation. You must <strong>normalise</strong> it — adjust the coefficient until it sits between 1 and 10, then fix the exponent to match.</p>
+
+    <div class="rule-box">
+      <p class="rule-text">
+        <strong>The normalising rule:</strong><br>
+        — Coefficient <span class="tag-red">≥ 10</span> (too big) &nbsp;→&nbsp; move decimal <strong>left</strong>, <span class="tag-red">increase</span> the exponent<br>
+        — Coefficient <span class="tag-org">< 1</span> (too small) &nbsp;→&nbsp; move decimal <strong>right</strong>, <span class="tag-org">decrease</span> the exponent
+      </p>
+    </div>
+
+    <hr class="divider">
+    <h2>Example 1 &nbsp;— Multiplication (result too big)</h2>
+
+    <div class="example-box">
+      <div class="step-row"><span class="step-arrow">Problem</span> <span><span class="math">(5 × 10²) × (4 × 10³)</span></span></div>
+      <div class="step-row"><span class="step-arrow">→</span> Multiply coefficients: &nbsp;<span class="math-inline">5 × 4 = 20</span></div>
+      <div class="step-row"><span class="step-arrow">→</span> Add exponents: &nbsp;<span class="math-inline">10² × 10³ = 10⁵</span></div>
+      <div class="step-row"><span class="step-arrow">→</span> Raw answer: &nbsp;<span class="math">20 × 10⁵</span> &nbsp;— 20 is ≥ 10, not allowed</div>
+      <div class="step-row"><span class="step-arrow">→</span> Move decimal <span class="tag-red">left</span>: &nbsp;<span class="math-inline">20 → 2.0</span>, exponent <span class="tag-red">increases</span>: &nbsp;<span class="math-inline">10⁵ → 10⁶</span></div>
+      <div class="step-row"><span class="step-arrow">✓</span> <span class="tag-grn">Answer: &nbsp;<span class="math">2 × 10⁶</span></span></div>
+    </div>
+
+    <hr class="divider">
+    <h2>Example 2 &nbsp;— Division (result too small)</h2>
+
+    <div class="example-box">
+      <div class="step-row"><span class="step-arrow">Problem</span> <span><span class="math">(2 × 10⁵) ÷ (4 × 10²)</span></span></div>
+      <div class="step-row"><span class="step-arrow">→</span> Divide coefficients: &nbsp;<span class="math-inline">2 ÷ 4 = 0.5</span></div>
+      <div class="step-row"><span class="step-arrow">→</span> Subtract exponents: &nbsp;<span class="math-inline">10⁵ ÷ 10² = 10³</span></div>
+      <div class="step-row"><span class="step-arrow">→</span> Raw answer: &nbsp;<span class="math">0.5 × 10³</span> &nbsp;— 0.5 is &lt; 1, not allowed</div>
+      <div class="step-row"><span class="step-arrow">→</span> Move decimal <span class="tag-org">right</span>: &nbsp;<span class="math-inline">0.5 → 5.0</span>, exponent <span class="tag-org">decreases</span>: &nbsp;<span class="math-inline">10³ → 10²</span></div>
+      <div class="step-row"><span class="step-arrow">✓</span> <span class="tag-grn">Answer: &nbsp;<span class="math">5 × 10²</span></span></div>
+    </div>
+
+    <button class="btn btn-blue" onclick="startQuiz()">I understand — start drill →</button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCREEN 1 — Questions
+  ══════════════════════════════════════ -->
+  <div class="screen" id="screen-question">
+    <p class="subtitle" id="q-topic"></p>
+    <div class="question-text" id="q-text"></div>
+    <div class="choices" id="q-choices"></div>
+    <div class="feedback" id="q-feedback">
+      <div class="fb-title" id="fb-title"></div>
+      <div id="fb-solution"></div>
+    </div>
+    <button class="btn btn-green hidden" id="btn-next" onclick="nextQuestion()">Continue →</button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCREEN 2 — Results
+  ══════════════════════════════════════ -->
+  <div class="screen" id="screen-results">
+    <div class="results-header">
+      <div class="results-emoji" id="results-emoji"></div>
+      <div class="results-score" id="results-score"></div>
+      <div class="results-denom">out of 6</div>
+      <div class="results-msg" id="results-msg"></div>
+    </div>
+    <ul class="results-list" id="results-list"></ul>
+    <button class="btn btn-green btn-full" onclick="copyScore()" style="margin-top:28px">
+      Copy score to clipboard
+    </button>
+    <p id="copy-confirm" style="text-align:center;color:#58cc02;font-size:13px;margin-top:10px;display:none">✓ Copied! Paste it into our chat.</p>
+    <button class="btn btn-blue btn-full" onclick="restartQuiz()" style="margin-top:12px">
+      ↩ Review rule &amp; try again
+    </button>
+  </div>
+
+</div>
+
+<script>
+const questions = [
+  /* 1 — multiplication, too big */ {
+    topic: "Multiplication — normalise the result",
+    q: "(8 × 10³) × (3 × 10⁵) = ?",
+    choices: ["24 × 10⁸", "2.4 × 10⁸", "11 × 10⁸", "2.4 × 10⁹"],
+    correct: 3,
+    solution: [
+      "Multiply coefficients:  8 × 3 = 24",
+      "Add exponents:  10³ × 10⁵ = 10⁸",
+      "Raw answer: 24 × 10⁸ — 24 is ≥ 10, normalise",
+      "Move decimal left:  24 → 2.4,  exponent increases:  10⁸ → 10⁹",
+      "Answer:  2.4 × 10⁹"
+    ]
+  },
+  /* 2 — multiplication, too big */ {
+    topic: "Multiplication — normalise the result",
+    q: "(4 × 10⁵) × (8 × 10²) = ?",
+    choices: ["3.2 × 10⁷", "32 × 10⁷", "3.2 × 10⁸", "12 × 10⁷"],
+    correct: 2,
+    solution: [
+      "Multiply coefficients:  4 × 8 = 32",
+      "Add exponents:  10⁵ × 10² = 10⁷",
+      "Raw answer: 32 × 10⁷ — 32 is ≥ 10, normalise",
+      "Move decimal left:  32 → 3.2,  exponent increases:  10⁷ → 10⁸",
+      "Answer:  3.2 × 10⁸"
+    ]
+  },
+  /* 3 — multiplication, too big */ {
+    topic: "Multiplication — normalise the result",
+    q: "(7 × 10³) × (4 × 10⁶) = ?",
+    choices: ["2.8 × 10⁹", "28 × 10⁹", "2.8 × 10¹⁰", "11 × 10⁹"],
+    correct: 2,
+    solution: [
+      "Multiply coefficients:  7 × 4 = 28",
+      "Add exponents:  10³ × 10⁶ = 10⁹",
+      "Raw answer: 28 × 10⁹ — 28 is ≥ 10, normalise",
+      "Move decimal left:  28 → 2.8,  exponent increases:  10⁹ → 10¹⁰",
+      "Answer:  2.8 × 10¹⁰"
+    ]
+  },
+  /* 4 — division, too small */ {
+    topic: "Division — normalise the result",
+    q: "(3 × 10⁷) ÷ (6 × 10³) = ?",
+    choices: ["5 × 10⁴", "0.5 × 10⁴", "5 × 10⁵", "5 × 10³"],
+    correct: 3,
+    solution: [
+      "Divide coefficients:  3 ÷ 6 = 0.5",
+      "Subtract exponents:  10⁷ ÷ 10³ = 10⁴",
+      "Raw answer: 0.5 × 10⁴ — 0.5 is < 1, normalise",
+      "Move decimal right:  0.5 → 5.0,  exponent decreases:  10⁴ → 10³",
+      "Answer:  5 × 10³"
+    ]
+  },
+  /* 5 — division, too small */ {
+    topic: "Division — normalise the result",
+    q: "(1.8 × 10⁷) ÷ (6 × 10³) = ?",
+    choices: ["0.3 × 10⁴", "3 × 10⁴", "3 × 10²", "3 × 10³"],
+    correct: 3,
+    solution: [
+      "Divide coefficients:  1.8 ÷ 6 = 0.3",
+      "Subtract exponents:  10⁷ ÷ 10³ = 10⁴",
+      "Raw answer: 0.3 × 10⁴ — 0.3 is < 1, normalise",
+      "Move decimal right:  0.3 → 3.0,  exponent decreases:  10⁴ → 10³",
+      "Answer:  3 × 10³"
+    ]
+  },
+  /* 6 — division, too small */ {
+    topic: "Division — normalise the result",
+    q: "(5.6 × 10⁹) ÷ (7 × 10⁵) = ?",
+    choices: ["0.8 × 10⁴", "8 × 10⁴", "8 × 10²", "8 × 10³"],
+    correct: 3,
+    solution: [
+      "Divide coefficients:  5.6 ÷ 7 = 0.8",
+      "Subtract exponents:  10⁹ ÷ 10⁵ = 10⁴",
+      "Raw answer: 0.8 × 10⁴ — 0.8 is < 1, normalise",
+      "Move decimal right:  0.8 → 8.0,  exponent decreases:  10⁴ → 10³",
+      "Answer:  8 × 10³"
+    ]
+  }
+];
+
+let current = 0, score = 0, results = [], answered = false;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startQuiz() {
+  current = 0; score = 0; results = []; answered = false;
+  document.getElementById('topBar').style.display = 'block';
+  showScreen('screen-question');
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false;
+  const q = questions[current];
+  document.getElementById('q-topic').textContent = q.topic;
+  document.getElementById('q-text').textContent  = q.q;
+
+  const choicesDiv = document.getElementById('q-choices');
+  choicesDiv.innerHTML = '';
+  q.choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className   = 'choice-btn';
+    btn.textContent = c;
+    btn.onclick     = () => selectChoice(i);
+    choicesDiv.appendChild(btn);
+  });
+
+  const fb = document.getElementById('q-feedback');
+  fb.style.display = 'none';
+  fb.className     = 'feedback';
+  document.getElementById('btn-next').classList.add('hidden');
+  updateProgress();
+}
+
+function updateProgress() {
+  const pct = (current / questions.length) * 100;
+  document.getElementById('progressFill').style.width  = pct + '%';
+  document.getElementById('progressLabel').textContent = 'Question ' + (current + 1) + ' of ' + questions.length;
+  document.getElementById('scoreLabel').textContent    = '✓ ' + score;
+}
+
+function selectChoice(index) {
+  if (answered) return;
+  answered = true;
+
+  const q    = questions[current];
+  const btns = document.querySelectorAll('.choice-btn');
+  btns.forEach(b => b.disabled = true);
+
+  const isCorrect = index === q.correct;
+  btns[index].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) btns[q.correct].classList.add('correct');
+
+  if (isCorrect) score++;
+  results.push({ q: q.q, correct: isCorrect });
+  updateProgress();
+
+  const fb = document.getElementById('q-feedback');
+  fb.style.display = 'block';
+
+  if (isCorrect) {
+    fb.className = 'feedback correct-fb';
+    document.getElementById('fb-title').textContent   = '✓  Correct!';
+    document.getElementById('fb-solution').innerHTML  = '';
+    setTimeout(nextQuestion, 1800);
+  } else {
+    fb.className = 'feedback wrong-fb';
+    document.getElementById('fb-title').textContent = '✗  Not quite — here\'s the full solution:';
+    document.getElementById('fb-solution').innerHTML = q.solution.map((s, i) =>
+      '<div class="sol-step">' +
+        '<span class="sol-num">' + (i + 1) + '</span>' +
+        '<span class="sol-text">' + s + '</span>' +
+      '</div>'
+    ).join('');
+    document.getElementById('btn-next').classList.remove('hidden');
+  }
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) showResults();
+  else loadQuestion();
+}
+
+function showResults() {
+  document.getElementById('topBar').style.display = 'none';
+  showScreen('screen-results');
+
+  const pct = Math.round((score / questions.length) * 100);
+  let emoji, msg;
+  if (pct === 100) {
+    emoji = '🏆';
+    msg   = 'Perfect! You have mastered normalising. Q7 and Q10 will not trouble you again.';
+  } else if (pct >= 67) {
+    emoji = '🌟';
+    msg   = 'Good progress. Review the questions in red, focus on which direction to shift, then try again.';
+  } else {
+    emoji = '📖';
+    msg   = 'Re-read the rule at the start carefully — pay attention to which direction you move the decimal and what happens to the exponent.';
+  }
+
+  document.getElementById('results-emoji').textContent = emoji;
+  document.getElementById('results-score').textContent = score;
+  document.getElementById('results-msg').textContent   = msg;
+
+  document.getElementById('results-list').innerHTML = results.map((r, i) =>
+    '<li>' +
+      '<div class="dot ' + (r.correct ? 'dot-green' : 'dot-red') + '"></div>' +
+      '<span class="q-num">Q' + (i + 1) + '</span> ' +
+      r.q +
+    '</li>'
+  ).join('');
+}
+
+function copyScore() {
+  const date   = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  const pct    = Math.round((score / questions.length) * 100);
+  const missed = results
+    .map((r, i) => r.correct ? null : '  Q' + (i + 1) + ': ' + questions[i].q)
+    .filter(Boolean)
+    .join('\n');
+  const text =
+    'Student: Divine\n' +
+    'Drill: Scientific Notation — Normalising\n' +
+    'Date: ' + date + '\n' +
+    'Score: ' + score + ' / ' + questions.length + ' (' + pct + '%)\n' +
+    (missed ? '\nQuestions to review:\n' + missed : '\nAll questions correct!');
+  navigator.clipboard.writeText(text).then(function() {
+    const el = document.getElementById('copy-confirm');
+    el.style.display = 'block';
+    setTimeout(function() { el.style.display = 'none'; }, 3000);
+  });
+}
+
+function restartQuiz() {
+  document.getElementById('topBar').style.display = 'none';
+  showScreen('screen-example');
+}
+</script>
+</body>
+</html>
